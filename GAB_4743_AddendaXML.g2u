@@ -1,0 +1,417 @@
+Program.Sub.ScreenSU.Start
+Gui.F_AgregarXMLDashboard..Create
+Gui.F_AgregarXMLDashboard..Caption("Seleccionar poliza para insertar XML")
+Gui.F_AgregarXMLDashboard..Size(16875,11220)
+Gui.F_AgregarXMLDashboard..MinX(0)
+Gui.F_AgregarXMLDashboard..MinY(0)
+Gui.F_AgregarXMLDashboard..Position(0,0)
+Gui.F_AgregarXMLDashboard..BackColor(-2147483633)
+Gui.F_AgregarXMLDashboard..MousePointer(0)
+Gui.F_AgregarXMLDashboard..Event(UnLoad,UnLoad)
+Gui.F_AgregarXMLDashboard.GsGridGLDetail.Create(GsGridControl)
+Gui.F_AgregarXMLDashboard.GsGridGLDetail.Size(16260,9795)
+Gui.F_AgregarXMLDashboard.GsGridGLDetail.Position(180,615)
+Gui.F_AgregarXMLDashboard.GsGridGLDetail.Event(RowCellClick,GsGridGLDetail_RowCellClick)
+Gui.F_AgregarXMLDashboard.cmdExportar.Create(Button)
+Gui.F_AgregarXMLDashboard.cmdExportar.Size(1590,375)
+Gui.F_AgregarXMLDashboard.cmdExportar.Position(14760,105)
+Gui.F_AgregarXMLDashboard.cmdExportar.Caption("Exportar")
+Gui.F_AgregarXMLDashboard.cmdExportar.Event(Click,cmdExportar_Click)
+Gui.F_SelectBatch..Create
+Gui.F_SelectBatch..Caption("Selecciona el numero de Batch")
+Gui.F_SelectBatch..Size(8250,3420)
+Gui.F_SelectBatch..MinX(0)
+Gui.F_SelectBatch..MinY(0)
+Gui.F_SelectBatch..Position(0,0)
+Gui.F_SelectBatch..BackColor(-2147483633)
+Gui.F_SelectBatch..MousePointer(0)
+Gui.F_SelectBatch..Event(UnLoad,UnLoad)
+Gui.F_SelectBatch.lbl1.Create(Label,"Selecciona numero de Batch",True,3855,405,0,1500,900,True,0,"Arial",8,-2147483633,0)
+Gui.F_SelectBatch.cmdBatchBrowser.Create(Button)
+Gui.F_SelectBatch.cmdBatchBrowser.Size(375,375)
+Gui.F_SelectBatch.cmdBatchBrowser.Position(3705,1350)
+Gui.F_SelectBatch.cmdBatchBrowser.Caption("^")
+Gui.F_SelectBatch.cmdBatchBrowser.Event(Click,cmdBatchBrowser_Click)
+Gui.F_SelectBatch.cmdGenerarDashboard.Create(Button)
+Gui.F_SelectBatch.cmdGenerarDashboard.Size(1650,375)
+Gui.F_SelectBatch.cmdGenerarDashboard.Position(3855,1890)
+Gui.F_SelectBatch.cmdGenerarDashboard.Caption("GENERAR")
+Gui.F_SelectBatch.cmdGenerarDashboard.Event(Click,cmdGenerarDashboard_Click)
+Gui.F_SelectBatch.txtBatch.Create(TextBox,"",True,1215,300,0,1740,1350,True,0,"Arial",8,-2147483643,1)
+Gui.F_SelectBatch.txtBatch.Locked(True)
+Gui.F_SelectBatch.chkPMJ.Create(CheckBox)
+Gui.F_SelectBatch.chkPMJ.Size(2685,360)
+Gui.F_SelectBatch.chkPMJ.Position(885,255)
+Gui.F_SelectBatch.chkPMJ.Caption("Polizas Manuales J")
+Gui.F_SelectBatch.chkPMJ.Event(Click,chkPMJ_Click)
+Gui.F_SelectBatch.chkCXP.Create(CheckBox)
+Gui.F_SelectBatch.chkCXP.Size(3150,360)
+Gui.F_SelectBatch.chkCXP.Position(3990,255)
+Gui.F_SelectBatch.chkCXP.Caption("Polizas Cuentas x Pagar")
+Gui.F_SelectBatch.chkCXP.Event(Click,chkCXP_Click)
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+'v.Global.sBatch.Declare
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+'This project is for Mexican Customers who use Electronic Accounting
+'On AP>Tansactions>AP Batch Entry > New Invoice Script 3 you can open Govenrment's XML File and save it to a Custom Table
+'Added same process on AP Batch Entry > Invoice/Acurrals
+F.ODBC.Connection!Conx.OpenCompanyConnection
+'AP Batch Entry > New Invoice Populate Hook
+F.Intrinsic.Control.If(v.Caller.Hook,=,35105)
+	V.Passed.000053.Set("SAT UUID")
+'AP Batch Entry > New Invoice Script 3 Hook
+F.Intrinsic.Control.ElseIf(v.Caller.Hook,=,35123)
+	F.Intrinsic.Control.CallSub(F_UUID_SavetoDB)
+'AP Batch Entry > Invoice/Acurrals Populate Hook
+f.Intrinsic.Control.ElseIf(v.Caller.Hook,=,33510)
+	v.Passed.000226.Set("SAT UUID")
+'AP Batch Entry > Invoice/Acurrals Script 3 Hook
+f.Intrinsic.Control.ElseIf(v.Caller.Hook,=,33542)
+	F.Intrinsic.Control.CallSub(F_UUID_SavetoDBAccurals)
+
+f.Intrinsic.Control.ElseIf(v.Caller.Switches,=,"B")
+	gui.F_SelectBatch..Show
+	
+F.Intrinsic.Control.EndIf
+Program.Sub.Main.End
+
+Program.Sub.chkPMJ_Click.Start
+f.Intrinsic.Control.If(v.Screen.F_SelectBatch!chkPMJ.Value,=,1)
+	gui.F_SelectBatch.chkCXP.Value(0)
+F.Intrinsic.Control.Else
+	gui.F_SelectBatch.chkCXP.Value(1)
+f.Intrinsic.Control.EndIf
+
+Program.Sub.chkPMJ_Click.End
+
+Program.Sub.chkCXP_Click.Start
+f.Intrinsic.Control.If(v.Screen.F_SelectBatch!chkCXP.Value,=,1)
+	gui.F_SelectBatch.chkPMJ.Value(0)
+F.Intrinsic.Control.Else
+	gui.F_SelectBatch.chkPMJ.Value(1)
+f.Intrinsic.Control.EndIf
+Program.Sub.chkCXP_Click.End
+
+Program.Sub.F_UUID_SavetoDB.Start
+V.Local.sFile.Declare
+V.Local.sRet.Declare
+V.Local.sSQL.Declare
+V.Local.sInvoice.Declare
+V.Local.sVendor.Declare
+v.Local.sCount.Declare
+	
+V.Local.sVendor.Set(v.Passed.000002.Trim)
+v.Local.sInvoice.Set(v.Passed.000018.Trim)
+
+
+	Function.Intrinsic.UI.ShowOpenFileDialog("","*.xml|*.xml",V.Local.sFile)
+	F.Intrinsic.Control.If(v.Local.sFile,<>,"***CANCEL***")
+		Function.Intrinsic.File.File2String(V.Local.sFile, V.Local.sRet)
+		f.Intrinsic.UI.Msgbox(v.Local.sRet)
+		
+		F.ODBC.Connection!conX.OpenRecordsetRW("rst","Select * from GAB_4743_ADDENDAXML")		
+		F.Intrinsic.Control.If(v.ODBC.CONX!RST.EOF,=,True)
+			F.ODBC.CONX!RST.AddNew
+			Function.ODBC.conx!rst.Set!VENDOR_NUM(v.Local.sVendor)
+			Function.ODBC.conx!rst.Set!INVOICE_NUM(v.Local.sInvoice)
+		F.Intrinsic.Control.EndIf		
+		Function.ODBC.conx!rst.Set!ADD_XML(v.Local.sRet)		
+
+		Function.ODBC.conx!rst.Update
+		F.Intrinsic.UI.Msgbox("XML Importado")
+		Function.ODBC.conx!rst.Close			
+	F.Intrinsic.Control.EndIf
+
+Program.Sub.F_UUID_SavetoDB.End
+
+Program.Sub.F_UUID_Unload.Start
+F.ODBC.Connection!conx.Close
+F.Intrinsic.Control.End
+Program.Sub.F_UUID_Unload.End
+
+Program.Sub.F_UUID_SavetoDBAccurals.Start
+V.Local.sFile.Declare
+V.Local.sRet.Declare
+V.Local.sSQL.Declare
+V.Local.sInvoice.Declare
+V.Local.sVendor.Declare
+v.Local.sCount.Declare
+
+V.Local.sVendor.Set(v.Passed.000051.Trim)
+v.Local.sInvoice.Set(v.Passed.000007.Trim)
+
+
+	Function.Intrinsic.UI.ShowOpenFileDialog("","*.xml|*.xml",V.Local.sFile)
+	F.Intrinsic.Control.If(v.Local.sFile,<>,"***CANCEL***")
+		Function.Intrinsic.File.File2String(V.Local.sFile, V.Local.sRet)
+		f.Intrinsic.UI.Msgbox(v.Local.sRet)
+		
+		
+		F.ODBC.Connection!conX.OpenRecordsetRW("rst","Select * from GAB_4743_ADDENDAXML")		
+		F.Intrinsic.Control.If(v.ODBC.CONX!RST.EOF,=,True)
+			F.ODBC.CONX!RST.AddNew
+			Function.ODBC.conx!rst.Set!VENDOR_NUM(v.Local.sVendor)
+			Function.ODBC.conx!rst.Set!INVOICE_NUM(v.Local.sInvoice)
+		F.Intrinsic.Control.EndIf		
+		Function.ODBC.conx!rst.Set!ADD_XML(v.Local.sRet)		
+
+		Function.ODBC.conx!rst.Update
+		F.Intrinsic.UI.Msgbox("XML Importado")
+		Function.ODBC.conx!rst.Close	
+	F.Intrinsic.Control.EndIf
+
+
+Program.Sub.F_UUID_SavetoDBAccurals.End
+
+Program.Sub.cmdBatchBrowser_Click.Start
+v.Local.sTitles.Declare
+v.Local.iWidths.Declare(long)
+v.Local.sRet.Declare
+v.Local.sSQL.Declare
+
+'Select Batch from GL_JOURNAL_DTL 
+F.Intrinsic.String.Split("BATCH*!*DESCRIPCION","*!*",v.local.sTitles)
+F.Intrinsic.String.Split("100*!*800","*!*",v.local.iWidths)
+F.Intrinsic.UI.SetBrowserHotTypeAhead(True)
+''F.Intrinsic.UI.Browser("Seleccione Batch","CONX","select DISTINCT GL.BATCH, GL.DESCRIPTION from GL_DETAIL GL  LEFT JOIN GL_AP_DETAIL GLAP ON GLAP.BATCH = GL.BATCH  LEFT JOIN GL_JOURNAL_DTL GLJ ON GLJ.BATCH = GL.BATCH  LEFT JOIN GL_MASTER GLM ON GLM.GL_ACCOUNT = GL.GL_NUMBER where GL.BATCH like 'J%' OR GL.BATCH Like 'A%'  order by GL.trans_date DESC",v.Local.sTitles,v.Local.iWidths,v.Local.sRet)
+
+F.Intrinsic.Control.If(V.Screen.F_SelectBatch!chkPMJ.Value,=,1)
+	F.Intrinsic.UI.Browser("Seleccione Batch","CONX","select distinct batch,description from GL_DETAIL where BATCH like 'J%' order by trans_date DESC",v.Local.sTitles,v.Local.iWidths,v.Local.sRet)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.If(V.Screen.F_SelectBatch!chkCXP.Value,=,1)
+		F.Intrinsic.UI.Browser("Seleccione Batch","CONX","select distinct batch,description from GL_DETAIL where BATCH Like 'A%' order by trans_date DESC",v.Local.sTitles,v.Local.iWidths,v.Local.sRet)
+F.Intrinsic.Control.EndIf
+
+
+F.Intrinsic.Control.If(v.Local.sRet,"=","***CANCEL***")
+F.Intrinsic.Control.Else
+	F.Intrinsic.String.Split(v.Local.sRet,"*!*",v.Local.sRet)
+	gui.F_SelectBatch.txtBatch.Text(V.Local.sRet(0).Trim)
+	'v.Global.sBatch.Set(V.Local.sRet(0).Trim)
+F.Intrinsic.Control.EndIf
+Program.Sub.cmdBatchBrowser_Click.End
+
+Program.Sub.cmdGenerarDashboard_Click.Start
+v.Local.sSQL.Declare
+V.Local.i1.Declare
+V.Local.sXML.Declare
+v.Local.sBatch.Declare
+
+
+v.Local.sBatch.Set(v.Screen.F_SelectBatch!txtBatch.Text)
+
+
+'Create Data Table
+F.Intrinsic.Control.If(V.DataTable.XML_Dash_DT.Exists)
+	F.data.datatable.close("XML_Dash_DT")
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.If(V.Screen.F_SelectBatch!chkPMJ.Value,=,1)
+	f.Intrinsic.String.Build("select DISTINCT GLJ.GL_NUMBER+GLJ.POST_DATE+GLJ.BATCH+GLJ.DESCRIPTION AS ID, GLJ.GL_NUMBER, GLM.DESCR AS CTA_CONTABLE, GLJ.POST_DATE, GLJ.BATCH, GLJ.LINE, GLJ.PERIOD, GLJ.DESCRIPTION, GLJ.AMOUNT_CMPNY from GL_JOURNAL_DTL GLJ INNER JOIN GL_MASTER GLM ON GLM.GL_ACCOUNT = GLJ.GL_NUMBER where GLJ.batch ='{0}' order by GLJ.BATCH, GLJ.LINE",V.Local.sBatch,V.Local.sSQL)
+F.Intrinsic.Control.EndIf
+
+F.Intrinsic.Control.If(V.Screen.F_SelectBatch!chkCXP.Value,=,1)
+		f.Intrinsic.String.Build("select DISTINCT GL.GL_NUMBER+GL.POST_DATE+GL.BATCH+GL.DESCRIPTION AS ID, GL.GL_NUMBER, GLM.DESCR AS CTA_CONTABLE, GL.POST_DATE, GL.BATCH, GL.LINE, GL.PERIOD, GL.DESCRIPTION, GL.AMOUNT_CMPNY from GL_DETAIL GL LEFT JOIN GL_AP_DETAIL GLAP ON GLAP.BATCH = GL.BATCH INNER JOIN GL_MASTER GLM ON GLM.GL_ACCOUNT = GL.GL_NUMBER WHERE GL.BATCH = '{0}' order by GL.BATCH,GL.LINE ",V.Local.sBatch,V.Local.sSQL)
+F.Intrinsic.Control.EndIf
+
+
+
+'Load Data Table
+
+F.Data.DataTable.CreateFromSQL("XML_Dash_DT", "CONX", v.Local.sSQL, True)
+f.Data.DataView.Create("XML_Dash_DT", "XML_Dash_DV",22)
+'F.Data.DataTable.AddColumn("XML_Dash_DT", "CTA_CONTABLE", "String")
+f.Data.DataTable.AddColumn("XML_Dash_DT", "XML", "String")
+
+''DICTIONARY DESCRIPTION 
+'F.Data.Dictionary.CreateFromSQL("CTA_CONTABLE_Dic", "CONX", "select GL_ACCOUNT,DESCR from GL_MASTER")
+'F.Data.Dictionary.SetDefaultReturn("CTA_CONTABLE_Dic", "")
+'F.Data.DataTable.FillFromDictionary("XML_Dash_DT", "CTA_CONTABLE_Dic", "GL_NUMBER", "CTA_CONTABLE")
+'F.Data.Dictionary.Close("CTA_CONTABLE_Dic")
+
+
+'DICTIONARY XML
+F.Data.Dictionary.CreateFromSQL("XML_Dic", "CONX", "select GL_NUMBER+POST_DATE+BATCH+DESCRIPTION AS ID, XML from GAB_4743_GLXML")
+F.Data.Dictionary.SetDefaultReturn("XML_Dic", "")
+F.Data.DataTable.FillFromDictionary("XML_Dash_DT", "XML_Dic", "ID", "XML")
+F.Data.Dictionary.Close("XML_Dic")
+
+
+'load XML Info
+F.Intrinsic.Control.For(V.Local.i1,0,V.DataTable.XML_Dash_DT.RowCount--,1)
+	F.Intrinsic.String.Build("SELECT XML FROM GAB_4743_GLXML where GL_NUMBER = '{0}' and  POST_DATE = '{1}' and  BATCH = '{2}' and LINE = '{3}'",V.DataTable.XML_Dash_DT(V.Local.i1).GL_NUMBER!FieldValTrim,V.DataTable.XML_Dash_DT(V.Local.i1).POST_DATE!FieldValTrim,V.DataTable.XML_Dash_DT(V.Local.i1).BATCH!FieldValTrim,V.DataTable.XML_Dash_DT(V.Local.i1).LINE!FieldValTrim,V.Local.sSQL)
+	F.ODBC.Connection!Conx.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+	F.Intrinsic.Control.If(V.ODBC.Conx!rst.EOF,=,False)
+		V.Local.sXML.Set(V.DataTable(V.Local.i1).XML!FieldValTrim)
+		F.ODBC.Conx!rst.Close
+		F.Intrinsic.String.Build("select XML from GAB_4743_GLXML where XML = '{0}'",V.Local.sXML,V.Local.sSQL)
+		F.ODBC.Connection!Conx.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+		F.Intrinsic.Control.If(V.ODBC.Conx!rst.EOF,=,False)
+			F.Data.DataTable.SetValue("XML_Dash_DT",V.Local.i1,"XML",V.Local.sXML.Trim,V.ODBC.Conx!rst.FieldValTrim!nombre)
+		F.Intrinsic.Control.EndIf
+	F.Intrinsic.Control.EndIf
+	F.ODBC.Conx!rst.Close
+F.Intrinsic.Control.Next(V.Local.i1)
+
+
+
+gui.F_AgregarXMLDashboard.GsGridGLDetail.AddGridviewFromDataview("XML_Dash_GV", "XML_Dash_DT", "XML_Dash_DV")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.MainView("XML_Dash_GV")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "ID", "Visible", False)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "GL_NUMBER", "Caption", "NUM DE CC")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "POST_DATE", "Caption", "FECHA DE POST")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "BATCH", "Caption", "BATCH")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "LINE", "Caption", "LINEA")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "PERIOD", "Caption", "PERIODO")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "DESCRIPTION", "Caption", "DESCRIPCION")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "CTA_CONTABLE", "Caption", "CUENTA CONTABLE")
+
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "AMOUNT_CMPNY", "Caption", "CANTIDAD")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "XML", "Caption", "XML")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "GL_NUMBER","HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "POST_DATE", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "BATCH", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "LINE", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "PERIOD", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "DESCRIPTION","HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "AMOUNT_CMPNY", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "XML", "HeaderHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "GL_NUMBER","CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "POST_DATE", "CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "BATCH", "CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "LINE", "CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "PERIOD", "CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "DESCRIPTION","CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "AMOUNT_CMPNY", "CellHAlignment","Center")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "XML", "CellHAlignment","near")
+
+
+
+'"VisibleIndex","0")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "GL_NUMBER","VisibleIndex","0")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "CTA_CONTABLE", "VisibleIndex","1")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "POST_DATE", "VisibleIndex","2")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "BATCH", "VisibleIndex","3")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "LINE", "VisibleIndex","4")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "PERIOD", "VisibleIndex","5")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "DESCRIPTION","VisibleIndex","6")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "AMOUNT_CMPNY", "VisibleIndex","7")
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "XML", "VisibleIndex","8")
+
+
+'"Width", 80)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "GL_NUMBER","Width", 60)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "CTA_CONTABLE", "Width", 100)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "POST_DATE", "Width", 80)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "BATCH", "Width", 50)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "LINE", "Width", 40)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "PERIOD", "Width", 50)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "DESCRIPTION","Width", 150)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "AMOUNT_CMPNY", "Width", 60)
+gui.F_AgregarXMLDashboard.GsGridGLDetail.SetColumnProperty("XML_Dash_GV", "XML", "Width", 300)
+
+
+gui.F_AgregarXMLDashboard..Show
+
+Program.Sub.cmdGenerarDashboard_Click.End
+
+Program.Sub.GsGridGLDetail_RowCellClick.Start
+V.Local.sFile.Declare
+V.Local.sRet.Declare
+V.Local.sSQL.Declare
+
+F.Intrinsic.Control.If(V.Args.Column,=,"XML")
+	'Open -Windows Explorer and save .XML to variable sRet
+	Function.Intrinsic.UI.ShowOpenFileDialog("","*.xml|*.xml",V.Local.sFile)
+	F.Intrinsic.Control.If(v.Local.sFile,<>,"***CANCEL***")
+		Function.Intrinsic.File.File2String(V.Local.sFile, V.Local.sRet)
+		'f.Intrinsic.UI.Msgbox(v.Local.sRet)
+	
+	
+	'Save it into custom table GAB_4743_GLXML storing relationship between ID and XML
+		F.Intrinsic.String.Build("SELECT XML FROM GAB_4743_GLXML where GL_NUMBER = '{0}' and  POST_DATE = '{1}' and  BATCH = '{2}' and LINE = '{3}'",V.DataTable.XML_Dash_DT(V.Args.RowIndex).GL_NUMBER!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).POST_DATE!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).BATCH!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).LINE!FieldValTrim,V.Local.sSQL)
+		F.ODBC.Connection!CONX.OpenLocalRecordSetRO("rst",V.Local.sSQL)
+		F.Intrinsic.Control.If(V.ODBC.CONX!rst.EOF,=,True)
+			F.Intrinsic.String.Build("INSERT INTO GAB_4743_GLXML(GL_NUMBER,POST_DATE,BATCH,LINE,DESCRIPTION,XML) VALUES('{0}','{1}','{2}','{3}','{4}','{5}')",v.DataTable.XML_Dash_DT(V.Args.RowIndex).GL_NUMBER!FieldValTrim,v.DataTable.XML_Dash_DT(V.Args.RowIndex).POST_DATE!FieldValTrim,v.DataTable.XML_Dash_DT(V.Args.RowIndex).BATCH!FieldValTrim,v.DataTable.XML_Dash_DT(V.Args.RowIndex).LINE!FieldValTrim,v.DataTable.XML_Dash_DT(V.Args.RowIndex).DESCRIPTION!FieldValTrim,v.Local.sRet.PSQLFriendly,V.Local.sSQL)
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Build("UPDATE GAB_4743_GLXML set XML ='{1}' where GL_NUMBER = '{0}' and  POST_DATE = '{1}' and  BATCH = '{2}' and LINE = '{3}'",V.DataTable.XML_Dash_DT(V.Args.RowIndex).GL_NUMBER!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).POST_DATE!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).BATCH!FieldValTrim,V.DataTable.XML_Dash_DT(V.Args.RowIndex).LINE!FieldValTrim,V.Local.sSQL)
+			'F.Intrinsic.UI.Msgbox(v.Local.sRet)
+		F.Intrinsic.Control.EndIf
+'		Function.Intrinsic.Debug.InvokeDebugger
+'		Function.Intrinsic.Debug.Stop
+
+		F.ODBC.Connection!conx.Execute(V.Local.sSQL)
+		F.Intrinsic.UI.Msgbox(v.Local.sRet)
+		F.Intrinsic.UI.Msgbox("XML GUARDADO")	
+	'Store it into datatable
+		F.Data.DataTable.SetValue("XML_Dash_DT",V.Args.RowIndex,"XML",v.Local.sRet.PSQLFriendly)
+	F.Intrinsic.Control.EndIf
+f.Intrinsic.Control.EndIf	
+Program.Sub.GsGridGLDetail_RowCellClick.End
+
+Program.Sub.UnLoad.Start
+F.Intrinsic.Control.If(V.DataTable.XML_Dash_DT.Exists,=,True)
+	F.Data.DataTable.Close("XML_Dash_DT")
+F.Intrinsic.Control.EndIf
+
+F.ODBC.Connection!Conx.Close
+F.Intrinsic.Control.End
+Program.Sub.UnLoad.End
+
+Program.Sub.cmdExportar_Click.Start
+V.Local.sError.Declare(String)
+V.Local.sFileExport.Declare(String)
+V.Local.bExcel.Declare(Boolean)
+V.Local.sMsg.Declare(String)
+
+F.Intrinsic.Control.Try
+
+	F.Automation.MSExcel.CheckPresence(V.Local.bExcel)
+	F.Intrinsic.String.Format(V.Ambient.Date,"YYYYMMDD",V.Local.sMsg)
+	
+	F.Intrinsic.Control.If(V.Local.bExcel,=,True)
+		F.Intrinsic.UI.ShowSaveFileDialog("","*.xlsx|",V.Local.sFileExport)
+	F.Intrinsic.Control.Else
+		F.Intrinsic.UI.ShowSaveFileDialog("","*.csv|",V.Local.sFileExport)
+	F.Intrinsic.Control.EndIf
+	
+	F.Intrinsic.Control.If(V.Local.sFileExport,<>,"***CANCEL***")
+		F.Intrinsic.Control.If(V.Local.bExcel,=,True)
+			F.Intrinsic.String.Concat(V.Local.sFileExport,".xlsx",V.Local.sFileExport)
+			Gui.F_AgregarXMLDashboard.GsGridGLDetail.Export(V.Local.sFileExport,"xlsx")
+		F.Intrinsic.Control.Else
+			F.Intrinsic.String.Concat(V.Local.sFileExport,".csv",V.Local.sFileExport)
+			Gui.F_AgregarXMLDashboard.GsGridGLDetail.Export(V.Local.sFileExport,"csv")
+		F.Intrinsic.Control.EndIf
+		F.Intrinsic.String.Concat("Cuadricula exportada a ",V.Local.sFileExport,V.Local.sMsg)
+		F.Intrinsic.UI.Msgbox(V.Local.sMsg)
+		F.Intrinsic.Task.ShellExec(0,"",V.Local.sFileExport,"","",1)
+	F.Intrinsic.Control.EndIf
+
+
+
+
+F.Intrinsic.Control.Catch
+F.Intrinsic.String.Build("Project: {0}{1}{1}Subroutine: {2}{1}Error Occurred {3} with description {4}{1}{1}GAB Version: {5}", V.Ambient.ScriptPath, V.Ambient.Newline, V.Ambient.CurrentSubroutine, V.Ambient.ErrorNumber, V.Ambient.ErrorDescription, V.Ambient.GABVersion, V.Global.sError)
+F.Intrinsic.UI.Msgbox(V.Local.sError)
+f.Intrinsic.Control.CallSub(FrmDireccion_UnLoad)
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.EndTry
+
+Program.Sub.cmdExportar_Click.End
+
+
+
+
+
+Program.Sub.Comments.Start
+${$0$}$$}$SUPERVSR$}$9/13/2017 12:44:01 PM$}$False
+${$5$}$2.0.0.0$}$2
+${$6$}$acardenas$}$20210510014259076$}$WOCvtxu6/EPnAvQJE4I+q+v5cNawXCaAdoMl/M2uss2OH0VZzrCM4JHYRMG87lBlHILA/BC0iYpVs2Kpv0Vz6A==
+Program.Sub.Comments.End

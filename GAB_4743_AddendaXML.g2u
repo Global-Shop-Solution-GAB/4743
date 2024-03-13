@@ -100,6 +100,7 @@ Program.Sub.F_UUID_SavetoDB.Start
 V.Local.sFile.Declare
 V.Local.sRet.Declare
 V.Local.sSQL.Declare
+V.Local.sSQL2.Declare
 V.Local.sInvoice.Declare
 V.Local.sVendor.Declare
 v.Local.sCount.Declare
@@ -113,19 +114,46 @@ v.Local.sInvoice.Set(v.Passed.000018.Trim)
 		Function.Intrinsic.File.File2String(V.Local.sFile, V.Local.sRet)
 		f.Intrinsic.UI.Msgbox(v.Local.sRet)
 		
-		F.ODBC.Connection!conX.OpenRecordsetRW("rst","Select * from GAB_4743_ADDENDAXML")		
-		F.Intrinsic.Control.If(v.ODBC.CONX!RST.EOF,=,True)
-			F.ODBC.CONX!RST.AddNew
-			Function.ODBC.conx!rst.Set!VENDOR_NUM(v.Local.sVendor)
-			Function.ODBC.conx!rst.Set!INVOICE_NUM(v.Local.sInvoice)
-		F.Intrinsic.Control.EndIf		
-		Function.ODBC.conx!rst.Set!ADD_XML(v.Local.sRet)		
+'		F.ODBC.Connection!conX.OpenRecordsetRW("rst","Select * from GAB_4743_ADDENDAXML")		
+'		F.Intrinsic.Control.If(v.ODBC.CONX!RST.EOF,=,True)
+'			F.ODBC.CONX!RST.AddNew
+'			Function.ODBC.conx!rst.Set!VENDOR_NUM(v.Local.sVendor)
+'			Function.ODBC.conx!rst.Set!INVOICE_NUM(v.Local.sInvoice)
+'		F.Intrinsic.Control.EndIf		
+'		Function.ODBC.conx!rst.Set!ADD_XML(v.Local.sRet)		
 
-		Function.ODBC.conx!rst.Update
-		F.Intrinsic.UI.Msgbox("XML Importado")
-		Function.ODBC.conx!rst.Close			
+'		Function.ODBC.conx!rst.Update
+'		F.Intrinsic.UI.Msgbox("XML Importado")
+'		Function.ODBC.conx!rst.Close	
+
+
+'CHANGES MADE 03/13/24
+		F.Intrinsic.String.Build("Select * from GAB_4743_ADDENDAXML where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL)
+		F.ODBC.Connection!CONX.OpenLocalRecordSetRO("rst",V.Local.sSQL)
+		F.Intrinsic.Control.If(V.ODBC.CONX!rst.EOF,=,True)
+			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM,ADD_XML) VALUES('{0}','{1}','{2}')",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
+			F.ODBC.Connection!conx.Execute(V.Local.sSQL2)
+'		F.Intrinsic.Control.Else
+'			F.Intrinsic.String.Build("UPDATE GAB_4743_ADDENDAXML set ADD_XML ='{2}' where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
+		F.Intrinsic.Control.EndIf
+		
+		'F.Intrinsic.UI.Msgbox("XML Importado")
+		
+
+
+'	f.Data.DataTable.CreateFromSQL
+	F.Intrinsic.String.Build("Select VENDOR_NUM,INVOICE_NUM,ADD_XML from GAB_4743_ADDENDAXML where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL2)
+	F.Data.DataTable.CreateFromSQL("XML_DT", "CONX",V.Local.sSQL2, TRUE)
+	f.Data.DataTable.SetValue("XML_DT",-1,"VENDOR_NUM",V.Local.sVendor)
+	f.Data.DataTable.SetValue("XML_DT",-1,"INVOICE_NUM",v.Local.sInvoice)
+	f.Data.DataTable.SetValue("XML_DT",-1,"ADD_XML",v.Local.sRet(0).Trim)
+	f.Data.DataTable.SaveToDB("XML_DT", "CONX", "GAB_4743_ADDENDAXML","VENDOR_NUM*!*INVOICE_NUM",256)
+	f.Intrinsic.UI.Msgbox("XML Importado")
+	f.Data.DataTable.Close("XML_DT")
+
+		
 	F.Intrinsic.Control.EndIf
-
+F.ODBC.CONX!rst.Close
 Program.Sub.F_UUID_SavetoDB.End
 
 Program.Sub.F_UUID_Unload.Start
@@ -169,17 +197,28 @@ v.Local.sInvoice.Set(v.Passed.000007.Trim)
 		F.ODBC.Connection!CONX.OpenLocalRecordSetRO("rst",V.Local.sSQL)
 		F.Intrinsic.Control.If(V.ODBC.CONX!rst.EOF,=,True)
 			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM,ADD_XML) VALUES('{0}','{1}','{2}')",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
-		F.Intrinsic.Control.Else
-			F.Intrinsic.String.Build("UPDATE GAB_4743_ADDENDAXML set ADD_XML ='{2}' where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
+			F.ODBC.Connection!conx.Execute(V.Local.sSQL2)
+'		F.Intrinsic.Control.Else
+'			F.Intrinsic.String.Build("UPDATE GAB_4743_ADDENDAXML set ADD_XML ='{2}' where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
 		F.Intrinsic.Control.EndIf
-		F.ODBC.Connection!conx.Execute(V.Local.sSQL2)
-		F.Intrinsic.UI.Msgbox("XML Importado")
-		F.ODBC.CONX!rst.Close
+		
+		'F.Intrinsic.UI.Msgbox("XML Importado")
+		
 
 
+'	f.Data.DataTable.CreateFromSQL
+	F.Intrinsic.String.Build("Select VENDOR_NUM,INVOICE_NUM,ADD_XML from GAB_4743_ADDENDAXML where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL2)
+	F.Data.DataTable.CreateFromSQL("XML_DT", "CONX",V.Local.sSQL2, TRUE)
+	f.Data.DataTable.SetValue("XML_DT",-1,"VENDOR_NUM",V.Local.sVendor)
+	f.Data.DataTable.SetValue("XML_DT",-1,"INVOICE_NUM",v.Local.sInvoice)
+	f.Data.DataTable.SetValue("XML_DT",-1,"ADD_XML",v.Local.sRet(0).Trim)
+	f.Data.DataTable.SaveToDB("XML_DT", "CONX", "GAB_4743_ADDENDAXML","VENDOR_NUM*!*INVOICE_NUM",256)
+	f.Intrinsic.UI.Msgbox("XML Importado")
+	f.Data.DataTable.Close("XML_DT")
+
+		
 	F.Intrinsic.Control.EndIf
-
-
+F.ODBC.CONX!rst.Close
 Program.Sub.F_UUID_SavetoDBAccurals.End
 
 Program.Sub.cmdBatchBrowser_Click.Start
@@ -424,5 +463,5 @@ Program.Sub.cmdExportar_Click.End
 Program.Sub.Comments.Start
 ${$0$}$$}$SUPERVSR$}$9/13/2017 12:44:01 PM$}$False
 ${$5$}$2.0.0.0$}$2
-${$6$}$acardenas$}$20240313101658660$}$WOCvtxu6/EPnAvQJE4I+q+v5cNawXCaAn57IxUF8LQ9ZFRPrtk92iwK/EgKzOQ5pKisum1NCAWIL2/iWQQC/8A==
+${$6$}$acardenas$}$20240313142824848$}$WOCvtxu6/EPnAvQJE4I+q+v5cNawXCaAn57IxUF8LQ9ZFRPrtk92i5Nol+3B8L2MPZC5EuAMdAM+rCWiNwQcBQ==
 Program.Sub.Comments.End

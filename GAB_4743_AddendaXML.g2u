@@ -109,6 +109,7 @@ V.Local.sVendor.Set(v.Passed.000002.Trim)
 v.Local.sInvoice.Set(v.Passed.000018.Trim)
 
 
+
 	Function.Intrinsic.UI.ShowOpenFileDialog("","*.xml|*.xml",V.Local.sFile)
 	F.Intrinsic.Control.If(v.Local.sFile,<>,"***CANCEL***")
 		Function.Intrinsic.File.File2String(V.Local.sFile, V.Local.sRet)
@@ -127,11 +128,12 @@ v.Local.sInvoice.Set(v.Passed.000018.Trim)
 '		Function.ODBC.conx!rst.Close	
 
 
+
 'CHANGES MADE 03/13/24
 		F.Intrinsic.String.Build("Select * from GAB_4743_ADDENDAXML where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL)
 		F.ODBC.Connection!CONX.OpenLocalRecordSetRO("rst",V.Local.sSQL)
 		F.Intrinsic.Control.If(V.ODBC.CONX!rst.EOF,=,True)
-			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM,ADD_XML) VALUES('{0}','{1}','{2}')",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
+			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM) VALUES('{0}','{1}')",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL2)
 			F.ODBC.Connection!conx.Execute(V.Local.sSQL2)
 '		F.Intrinsic.Control.Else
 '			F.Intrinsic.String.Build("UPDATE GAB_4743_ADDENDAXML set ADD_XML ='{2}' where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
@@ -196,7 +198,7 @@ v.Local.sInvoice.Set(v.Passed.000007.Trim)
 		F.Intrinsic.String.Build("Select * from GAB_4743_ADDENDAXML where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL)
 		F.ODBC.Connection!CONX.OpenLocalRecordSetRO("rst",V.Local.sSQL)
 		F.Intrinsic.Control.If(V.ODBC.CONX!rst.EOF,=,True)
-			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM,ADD_XML) VALUES('{0}','{1}','{2}')",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
+			F.Intrinsic.String.Build("INSERT INTO GAB_4743_ADDENDAXML(VENDOR_NUM,INVOICE_NUM) VALUES('{0}','{1}')",V.Local.sVendor,v.Local.sInvoice,V.Local.sSQL2)
 			F.ODBC.Connection!conx.Execute(V.Local.sSQL2)
 '		F.Intrinsic.Control.Else
 '			F.Intrinsic.String.Build("UPDATE GAB_4743_ADDENDAXML set ADD_XML ='{2}' where VENDOR_NUM = '{0}' AND INVOICE_NUM = '{1}'",V.Local.sVendor,v.Local.sInvoice,v.Local.sRet(0).Trim,V.Local.sSQL2)
@@ -463,5 +465,5 @@ Program.Sub.cmdExportar_Click.End
 Program.Sub.Comments.Start
 ${$0$}$$}$SUPERVSR$}$9/13/2017 12:44:01 PM$}$False
 ${$5$}$2.0.0.0$}$2
-${$6$}$acardenas$}$20240313142824848$}$WOCvtxu6/EPnAvQJE4I+q+v5cNawXCaAn57IxUF8LQ9ZFRPrtk92i5Nol+3B8L2MPZC5EuAMdAM+rCWiNwQcBQ==
+${$6$}$Administrator$}$20240322144530836$}$+Bv+Vk4zGe6OsbDdwdGdHv/0/op7yByblpqQUXJDDRNCwp76uWzzt47LyuwXQ7sN6ljIYibMIZZ5/sL/xbXkjCxHu1FYsT/e
 Program.Sub.Comments.End
